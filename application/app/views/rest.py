@@ -18,6 +18,8 @@
 +-----------------+-----------+------------------------------------------------------------+
 | 27 Nov 2018     | Lucas Antognoni | Organizing application structure                     |
 +-----------------+-----------+------------------------------------------------------------+
+| 27 Nov 2018     | Lucas Antognoni | JWT tools                                            |
++-----------------+-----------+------------------------------------------------------------+
 
 Implementation
 ==============
@@ -34,8 +36,7 @@ from flask import Blueprint, jsonify, request
 restapi = Blueprint('restapi', __name__)
 
 
-# TOKEN ERROR CALLBACKS START
-
+# TOKEN ERROR CALLBACKS
 @jwt.unauthorized_loader
 def unauthorized_response(callback):
     """
@@ -124,11 +125,68 @@ def invalid_response(callback):
         'message': 'Token is invalid'
     }), 401
 
-# TOKEN ERROR CALLBACKS END
+
+@jwt.claims_verification_failed_loader
+def claims_response():
+    """
+        Invalid claims callback.
+
+        Author:
+            Lucas Antognoni
+
+        Arguments:
+
+        Response:
+            json
+                {
+                    'error': (boolean),
+                    'message': (str)
+                }
+
+        Response keys:
+
+            - 'error': True.
+            - 'message': Error message.
+    """
+
+    return jsonify({
+        'error': True,
+        'message': 'Invalid token claims'
+    }), 401
 
 
-# BASIC ROUTES START
+# TOKEN VERIFICATION
+@jwt.claims_verification_loader
+def verify_claims(claims):
+    """
+        Token claims verifier.
 
+        Author:
+            Lucas Antognoni
+
+        Arguments:
+            claims (dict): JWT claims dict
+
+        Response:
+            json
+                {
+                    'error': (boolean),
+                    'message': (str)
+                }
+
+        Response keys:
+
+            - 'error': True.
+            - 'message': Error message.
+    """
+
+    if 'org_id' in claims:
+        return True
+    else:
+        return False
+
+
+# BASIC ROUTES
 @restapi.route('/login', methods=['POST'])
 def login():
     if not request.is_json:
@@ -155,4 +213,3 @@ def login():
 def protected():
     return jsonify(payload=get_raw_jwt()), 200
 
-# BASIC ROUTES START
