@@ -11,7 +11,7 @@
 | **Description** | Security Tests for JWT authentication                                  |
 +-----------------+------------------------------------------------------------------------+
 | **Modifications**                                                                        |
-+-----------------+-----------+------------------------------------------------------------+
++-----------------+------------------------------------------------------------------------+
 | **Date**        | **Author**      | **Modification**                                     |
 +-----------------+------------------------------------------------------------------------+
 | 27 Nov 2018     | Lucas Antognoni | Base application structure                           |
@@ -28,85 +28,58 @@ Implementation
 ==============
 """
 
-import jwt
-import json
-import datetime
-import base64
+import sys
+sys.path.extend(['/home/lucas/Git/JWT_Security_Tests'])
+
+import requests
+
+from datetime import timedelta
+from common.jwt import create_token, custom_header, custom_payload, append_custom_header
 
 
-# Create token with specified payload, private key and algorithm
-def create_token(payload, private_key, algorithm):
-
-    token = jwt.encode(payload, private_key, algorithm)
-
-    return token
+JWT_PRIVATE_KEY = '-----BEGIN RSA PRIVATE KEY-----\nMIICWgIBAAKBgHuPWRxAWbRQRij4/tWmfstd5gFLO3Er2QrwoqEb2W98oOnLcyhx\nxdVDKhXtcnr1/H1WsTXS6aFNYk+9U8TIzmKtczKkWKYttzc28kNOX+Ia+mOSB7EN\nYu1xA3FY9tKNS7PD/SOhKGEYcYzWbvX8Eiy8oGcb3/Yy7MnpmOFO1PF/AgMBAAEC\ngYBsO+WTGct6Z9cNjQ+tl2r6OgaAm6Y2PHKjYqcS+ZI+Vq2eHtmBVCg3592114mw\nrEnAgXA59ccxxNeZgf8fIcem6aj+xzXZoPXDiRw9EPSmQEYAjEVCq40uvt+Tl+j+\n7OOND5FF2V2Y89mxUUmiO6xLrkjb2NqN86KEOC/VgbDaAQJBAN2CnpP4YZN7dijJ\nNyRV+UKLc+MO5hq02yBXvnwEYG1xYXinr4ZX4eqsTbWT6AH8BGFDNq+hI8fKYOHz\nr72FEXUCQQCOzHAsrlHqE1m/P9oEty8aKZTYnR01rWIsE4AZwGZTWw/awKq16WMh\n1+q+s7nC8Lzt90H3j7OIUGUzXTZ74QSjAkASzlAgR+og106Ez/B6iUIMQEKqeE1Y\n3xnreQeXB9gX8pRP5gyk3zky70X5sID2CitlBovSBWBAShJHnKTC9lUxAkA0Bo3T\n6YrUkko/YH8I+siBaqbdKJjMxqee0Vf5idx+AA5Nr6ZCco54dRcEdax3NohO1qfF\nDyjkwA2u4gYIqhmrAkB2ESXa2QD/rrD4r9FFT1YPYjmLi27lkqxe24fOKTsdGqvj\nqGfEkU9AWx6AJN0H/1sMhkpMkXvLplLN+opoF/Id\n-----END RSA PRIVATE KEY-----'
 
 
-def custom_header(algorithm, type):
+def send_request(token):
 
-    header = {
-        "alg": algorithm,
-        "typ": type
-    }
+    url = 'http://127.0.0.1:8080/protected'
+    headers = {'Authorization': (b'Bearer ' + token).decode("utf-8")}
 
-    str = json.dumps(header)
-    enc = str.encode()
+    r = requests.get(url, headers=headers)
 
-    return base64.urlsafe_b64encode(enc).replace(b'=', b'')
+    return r
 
 
-def custom_payload(claims, expiration=datetime.timedelta(hours=0)):
+def header_tests():
 
-    payload = {}
+    print('<<<<<<<<<< None alg test >>>>>>>>>>\n')
 
-    for c in claims:
+    claims = ['identity', 'org_id', 'access', 'fresh', 'iss', 'exp', 'iat', 'nbf', 'jti']
+    payload = custom_payload(claims, timedelta(hours=2))
 
-        if c == 'identity':
-            payload[c] = 'test_user'
+    header = custom_header('none', 'JWT')
+    print(header)
 
-        elif c == 'org_id':
-            payload[c] = 'test_org'
+    token = create_token(payload, JWT_PRIVATE_KEY, 'RS256')
 
-        elif c == 'access':
-            payload['type'] = 'access'
+    print(token)
 
-        elif c == 'refresh':
-            payload['type'] = 'refresh'
+    forged_token = append_custom_header(token, header)
 
-        elif c == 'custom_access':
-            payload['type'] = 'custom_type'
+    response = send_request(forged_token)
 
-        elif c == 'fresh':
-            payload[c] = True
-
-        elif c == 'not_fresh':
-            payload['fresh'] = False
-
-        elif c == 'iss':
-            payload[c] = 'issuer'
-
-        elif c == 'exp':
-            payload[c] = datetime.datetime.utcnow() + expiration
-
-        elif c == 'iat':
-            payload[c] = datetime.datetime.utcnow()
-
-        elif c == 'nbf':
-            payload[c] = datetime.datetime.utcnow()
-
-        elif c == 'jti':
-            payload[c] = 'ASDYH978Y3QH89DYHQ89Y398QY'
-
-        else:
-            payload[c] = 'custom_claim'
-
-    return payload
+    print(response.content)
 
 
-def append_custom_header(token, header):
+def payload_tests():
+    pass
 
-    split_token = token.split(b'.')
 
-    forged_token = header + b'.' + split_token[1] + b'.' + split_token[2]
+def header_test():
+    pass
 
-    return forged_token
+
+def header_test():
+    pass
+
+header_tests()
