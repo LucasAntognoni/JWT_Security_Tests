@@ -16,6 +16,8 @@
 +-----------------+-----------+------------------------------------------------------------+
 | 27 Nov 2018     | Lucas Antognoni | Base application structure                           |
 +-----------------+-----------+------------------------------------------------------------+
+| 27 Nov 2018     | Lucas Antognoni | Organizing application structure                     |
++-----------------+-----------+------------------------------------------------------------+
 
 Implementation
 ==============
@@ -24,10 +26,10 @@ Implementation
 import sys
 sys.path.extend(['/home/lucas/Git/JWT_Security_Tests'])
 
+from .. import app
 from app import jwt
 from flask_jwt_extended import jwt_required, get_raw_jwt, create_access_token
-from flask import Blueprint, abort, jsonify, url_for, Flask, request, Response
-
+from flask import Blueprint, jsonify, request
 
 restapi = Blueprint('restapi', __name__)
 
@@ -35,12 +37,12 @@ restapi = Blueprint('restapi', __name__)
 # TOKEN ERROR CALLBACKS START
 
 @jwt.unauthorized_loader
-def unauthorized_response():
+def unauthorized_response(callback):
     """
         Unauthorized token callback.
 
         Author:
-            Lucas Castro
+            Lucas Antognoni
 
         Arguments:
             callback (function): The method callback function.
@@ -70,7 +72,7 @@ def expired_response():
         Expired token callback.
 
         Author:
-            Lucas Castro
+            Lucas Antognoni
 
         Arguments:
 
@@ -94,12 +96,12 @@ def expired_response():
 
 
 @jwt.invalid_token_loader
-def invalid_response():
+def invalid_response(callback):
     """
         Invalid token callback.
 
         Author:
-            Lucas Castro
+            Lucas Antognoni
 
         Arguments:
             callback (function): The method callback function.

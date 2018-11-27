@@ -16,26 +16,29 @@
 +-----------------+-----------+------------------------------------------------------------+
 | 27 Nov 2018     | Lucas Antognoni | Base application structure                           |
 +-----------------+-----------+------------------------------------------------------------+
+| 27 Nov 2018     | Lucas Antognoni | Organizing application structure                     |
++-----------------+-----------+------------------------------------------------------------+
 
 Implementation
 ==============
 """
 
-from flask_script import Manager, Shell
-from app import app
-import os
+import sys
 
+sys.path.extend(['/home/lucas/Git/JWT_Security_Tests'])
 
-def make_shell_context():
-    return dict(app=app)
+from flask import Flask
+from flask_jwt_extended import JWTManager
 
+from config import config
 
-manager = Manager(app)
+app = Flask(__name__)
+config_name = 'development'
+app.config.from_object(config[config_name])
 
-manager.add_command("shell", Shell(make_context=make_shell_context))
+instance_path = app.root_path
 
-root_path = os.getcwd()
-static_path = os.path.join(root_path,'app')
+jwt = JWTManager(app)
 
-if __name__ == "__main__":
-    manager.run()
+from views.rest import restapi
+app.register_blueprint(restapi)
