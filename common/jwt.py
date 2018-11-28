@@ -22,6 +22,8 @@
 +-----------------+------------------------------------------------------------------------+
 | 27 Nov 2018     | Lucas Antognoni | Started tests development                            |
 +-----------------+------------------------------------------------------------------------+
+| 28 Nov 2018     | Lucas Antognoni | None & claims tests and started RSA to HMAC attack   |
++-----------------+------------------------------------------------------------------------+
 
 
 Implementation
@@ -34,16 +36,14 @@ import datetime
 import base64
 
 
-# Create token with specified payload, private key and algorithm
-def create_token(payload, private_key, algorithm):
+def create_token(payload, key, algorithm):
 
-    token = jwt.encode(payload, private_key, algorithm)
+    token = jwt.encode(payload, key, algorithm)
 
     return token
 
 
 def custom_header(algorithm, type):
-
     header = {
         "alg": algorithm,
         "typ": type
@@ -52,11 +52,10 @@ def custom_header(algorithm, type):
     str = json.dumps(header)
     enc = str.encode()
 
-    return base64.urlsafe_b64encode(enc).replace(b'=', b'')
+    return base64.urlsafe_b64encode(enc).replace(b'+', b'-').replace(b'/', b'_').replace(b'=', b'')
 
 
 def custom_payload(claims, expiration=datetime.timedelta(hours=0)):
-
     payload = {}
 
     for c in claims:
@@ -83,7 +82,7 @@ def custom_payload(claims, expiration=datetime.timedelta(hours=0)):
             payload['fresh'] = False
 
         elif c == 'iss':
-            payload[c] = 'issuer'
+            payload[c] = '3f95329783d2f4d0711bba881f37b41b'
 
         elif c == 'exp':
             payload[c] = datetime.datetime.utcnow() + expiration
@@ -95,7 +94,7 @@ def custom_payload(claims, expiration=datetime.timedelta(hours=0)):
             payload[c] = datetime.datetime.utcnow()
 
         elif c == 'jti':
-            payload[c] = 'ASDYH978Y3QH89DYHQ89Y398QY'
+            payload[c] = 'c18993a47807863b69e1749f2db7d09e'
 
         else:
             payload[c] = 'custom_claim'
@@ -104,7 +103,6 @@ def custom_payload(claims, expiration=datetime.timedelta(hours=0)):
 
 
 def append_custom_header(token, header):
-
     split_token = token.split(b'.')
 
     forged_token = header + b'.' + split_token[1] + b'.' + split_token[2]

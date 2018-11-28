@@ -22,6 +22,8 @@
 +-----------------+------------------------------------------------------------------------+
 | 27 Nov 2018     | Lucas Antognoni | Started tests development                            |
 +-----------------+------------------------------------------------------------------------+
+| 28 Nov 2018     | Lucas Antognoni | None & claims tests and started RSA to HMAC attack   |
++-----------------+------------------------------------------------------------------------+
 
 Implementation
 ==============
@@ -170,22 +172,13 @@ def verify_claims(claims):
             claims (dict): JWT claims dict
 
         Response:
-            json
-                {
-                    'error': (boolean),
-                    'message': (str)
-                }
-
-        Response keys:
-
-            - 'error': True.
-            - 'message': Error message.
+            valid (boolean): True if valid, False o/w.
     """
 
     if 'org_id' in claims:
-        return True
-    else:
         return False
+    else:
+        return True
 
 
 # BASIC ROUTES
@@ -213,5 +206,29 @@ def login():
 @restapi.route('/protected', methods=['GET'])
 @jwt_required
 def protected():
-    return jsonify(payload=get_raw_jwt()), 200
+    """
+        Protected endpoint for testing.
+
+        Author:
+            Lucas Antognoni
+
+        Arguments:
+
+        Response:
+            json
+                {
+                    'error': (boolean),
+                    'message': (str)
+                }
+
+        Response keys:
+
+            - 'error': False.
+            - 'message': Success message.
+    """
+
+    return jsonify({
+        'error': False,
+        'message': 'Valid token.'
+    }), 200
 
