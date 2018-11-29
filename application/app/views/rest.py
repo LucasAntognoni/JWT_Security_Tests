@@ -26,6 +26,8 @@
 +-----------------+------------------------------------------------------------------------+
 | 29 Nov 2018     | Lucas Antognoni | Finished all tests and started code documentation    |
 +-----------------+------------------------------------------------------------------------+
+| 29 Nov 2018     | Lucas Antognoni | Upgrading tests robustness                           |
++-----------------+------------------------------------------------------------------------+
 
 Implementation
 ==============
@@ -34,7 +36,6 @@ Implementation
 import sys
 sys.path.extend(['/home/lucas/Git/JWT_Security_Tests'])
 
-from .. import app
 from app import jwt
 from flask_jwt_extended import jwt_required, get_raw_jwt, create_access_token
 from flask import Blueprint, jsonify, request
@@ -161,7 +162,7 @@ def claims_response():
     }), 401
 
 
-# TOKEN VERIFICATION
+# CLAIMS VERIFICATION
 @jwt.claims_verification_loader
 def verify_claims(claims):
     """
@@ -181,28 +182,6 @@ def verify_claims(claims):
         return False
     else:
         return True
-
-
-# BASIC ROUTES
-@restapi.route('/login', methods=['POST'])
-def login():
-    if not request.is_json:
-        return jsonify({"msg": "Missing JSON in request"}), 400
-
-    username = request.json.get('username', None)
-    password = request.json.get('password', None)
-
-    if not username:
-        return jsonify({"msg": "Missing username parameter"}), 400
-    if not password:
-        return jsonify({"msg": "Missing password parameter"}), 400
-
-    if username != 'test' or password != 'test':
-        return jsonify({"msg": "Bad username or password"}), 401
-
-    # Identity can be any data that is json serializable
-    access_token = create_access_token(identity=username)
-    return jsonify(access_token=access_token), 200
 
 
 @restapi.route('/protected', methods=['GET'])

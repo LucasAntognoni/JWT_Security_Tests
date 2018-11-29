@@ -26,6 +26,8 @@
 +-----------------+------------------------------------------------------------------------+
 | 29 Nov 2018     | Lucas Antognoni | Finished all tests and started code documentation    |
 +-----------------+------------------------------------------------------------------------+
+| 29 Nov 2018     | Lucas Antognoni | Upgrading tests robustness                           |
++-----------------+------------------------------------------------------------------------+
 
 Implementation
 ==============
@@ -166,14 +168,19 @@ def missing_registered_claims_tests():
     print('\n<<<<<<<<<< Missing registered claim test >>>>>>>>>>\n')
 
     claims = ['identity', 'org_id', 'access', 'fresh', 'iss', 'exp', 'iat', 'nbf', 'jti']
+    to_be_removed = ['iss', 'exp', 'iat', 'nbf', 'jti']
 
-    print("No claim removed.")
+    while len(to_be_removed) > 0:
 
-    while len(claims) > 3:
+        element = to_be_removed.pop()
 
-        # print(claims)
+        print("\nRemoved claim: %s." % element)
 
-        payload = custom_payload(claims, timedelta(hours=2))
+        claims_ = [x for i, x in enumerate(claims) if x != element]
+
+        print(claims_)
+
+        payload = custom_payload(claims_, timedelta(hours=2))
 
         token = create_token(payload, JWT_PRIVATE_KEY, 'RS256')
 
@@ -183,8 +190,6 @@ def missing_registered_claims_tests():
         response = send_request(token)
 
         print(test_result_formatting(response.content))
-
-        print("\nRemoved claim: %s." % claims.pop())
 
     print('\n<<<<<<<<<<<<<<<<<<<<#>>>>>>>>>>>>>>>>>>>>\n')
 
@@ -205,14 +210,18 @@ def missing_public_claims_tests():
     print('\n<<<<<<<<<< Missing public claims test >>>>>>>>>>\n')
 
     claims = ['org_id', 'iss', 'exp', 'iat', 'nbf', 'jti', 'identity', 'access', 'fresh']
+    to_be_removed = ['identity', 'access', 'fresh']
 
-    print("No claim removed.")
+    while len(to_be_removed) > 0:
+        element = to_be_removed.pop()
 
-    while len(claims) > 5:
+        print("\nRemoved claim: %s." % element)
 
-        # print(claims)
+        claims_ = [x for i, x in enumerate(claims) if x != element]
 
-        payload = custom_payload(claims, timedelta(hours=2))
+        print(claims_)
+
+        payload = custom_payload(claims_, timedelta(hours=2))
 
         token = create_token(payload, JWT_PRIVATE_KEY, 'RS256')
 
@@ -222,8 +231,6 @@ def missing_public_claims_tests():
         response = send_request(token)
 
         print(test_result_formatting(response.content))
-
-        print("\nRemoved claim: %s." % claims.pop())
 
     print('\n<<<<<<<<<<<<<<<<<<<<#>>>>>>>>>>>>>>>>>>>>\n')
 
@@ -253,6 +260,7 @@ def missing_private_claim_test():
 
     response = send_request(token)
 
+    print("Removed claim: org_id")
     print(test_result_formatting(response.content))
 
     print('\n<<<<<<<<<<<<<<<<<<<<#>>>>>>>>>>>>>>>>>>>>\n')
@@ -270,6 +278,7 @@ def expired_token_test():
         Response:
             prints the output from test.
     """
+    print('\n<<<<<<<<<< Expired token test >>>>>>>>>>\n')
 
     claims = ['identity', 'org_id', 'access', 'fresh', 'iss', 'exp', 'iat', 'nbf', 'jti']
     payload = custom_payload(claims, timedelta(hours=0))
@@ -282,6 +291,8 @@ def expired_token_test():
     response = send_request(token)
 
     print(test_result_formatting(response.content))
+
+    print('\n<<<<<<<<<<<<<<<<<<<<#>>>>>>>>>>>>>>>>>>>>\n')
 
 
 def not_before_token_test():
@@ -297,6 +308,8 @@ def not_before_token_test():
             prints the output from test.
     """
 
+    print('\n<<<<<<<<<< Not before token test >>>>>>>>>>\n')
+
     claims = ['identity', 'org_id', 'access', 'fresh', 'iss', 'exp', 'iat', 'nbf', 'jti']
     payload = custom_payload(claims, timedelta(hours=2))
 
@@ -305,6 +318,8 @@ def not_before_token_test():
     response = send_request(token)
 
     print(test_result_formatting(response.content))
+
+    print('\n<<<<<<<<<<<<<<<<<<<<#>>>>>>>>>>>>>>>>>>>>\n')
 
 
 if __name__ == '__main__':
