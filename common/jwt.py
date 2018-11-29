@@ -24,29 +24,60 @@
 +-----------------+------------------------------------------------------------------------+
 | 28 Nov 2018     | Lucas Antognoni | None & claims tests and started RSA to HMAC attack   |
 +-----------------+------------------------------------------------------------------------+
+| 29 Nov 2018     | Lucas Antognoni | Finished all tests and started code documentation    |
++-----------------+------------------------------------------------------------------------+
 
 
 Implementation
 ==============
 """
 
-import jwt
 import json
 import datetime
 import base64
 
+from . import pyjwt
+
 
 def create_token(payload, key, algorithm):
+    """
+        Creates JWT token using custom pyjwt lib.
 
-    token = jwt.encode(payload, key, algorithm)
+        Author:
+            Lucas Antognoni
+
+        Arguments:
+            payload     (dict): The token payload.
+            key         (str):  Key or secret for signing.
+            algorithm   (str):  Signing algorithm.
+
+        Response:
+            token   (str):  JWT.
+    """
+
+    token = pyjwt.encode(payload, key, algorithm)
 
     return token
 
 
-def custom_header(algorithm, type):
+def custom_header(algorithm, media):
+    """
+        Creates JWT header.
+
+        Author:
+            Lucas Antognoni
+
+        Arguments:
+            algorithm   (str):  Signing algorithm.
+            media        (str):  Media type of JWS.
+
+        Response:
+            header  (bytes):  Base64 encoded header.
+    """
+
     header = {
         "alg": algorithm,
-        "typ": type
+        "typ": media
     }
 
     str = json.dumps(header)
@@ -55,7 +86,21 @@ def custom_header(algorithm, type):
     return base64.urlsafe_b64encode(enc).replace(b'+', b'-').replace(b'/', b'_').replace(b'=', b'')
 
 
-def custom_payload(claims, expiration=datetime.timedelta(hours=0)):
+def custom_payload(claims, expiration):
+    """
+        Creates JWT payload.
+
+        Author:
+            Lucas Antognoni
+
+        Arguments:
+            claims      (list): Token payload claims.
+            expiration  (datetime.timedelta):  Timedelta.
+
+        Response:
+            payload   (dict):  JWT payload.
+    """
+
     payload = {}
 
     for c in claims:
@@ -93,6 +138,9 @@ def custom_payload(claims, expiration=datetime.timedelta(hours=0)):
         elif c == 'nbf':
             payload[c] = datetime.datetime.utcnow()
 
+        elif c == 'custom_nbf':
+            payload['nbf'] = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+
         elif c == 'jti':
             payload[c] = 'c18993a47807863b69e1749f2db7d09e'
 
@@ -103,6 +151,20 @@ def custom_payload(claims, expiration=datetime.timedelta(hours=0)):
 
 
 def append_custom_header(token, header):
+    """
+        Changes JWT header.
+
+        Author:
+            Lucas Antognoni
+
+        Arguments:
+            token   (bytes):    JWT token.
+            header  (str):      New JWT header..
+
+        Response:
+            forged_token (str): Tempered token.
+    """
+
     split_token = token.split(b'.')
 
     forged_token = header + b'.' + split_token[1] + b'.' + split_token[2]
