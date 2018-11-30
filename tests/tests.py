@@ -143,8 +143,6 @@ def rs_to_hs_algorithm_test():
     claims = ['identity', 'org_id', 'access', 'fresh', 'iss', 'exp', 'iat', 'nbf', 'jti']
     payload = custom_payload(claims, timedelta(hours=2))
 
-    header = custom_header('HS256', 'JWT')
-
     token = create_token(payload, JWT_PUBLIC_KEY, 'HS256')
 
     response = send_request(token)
@@ -196,9 +194,9 @@ def missing_registered_claims_tests():
     print('\n<<<<<<<<<<<<<<<<<<<<#>>>>>>>>>>>>>>>>>>>>\n')
 
 
-def missing_public_claims_tests():
+def missing_library_claims_tests():
     """
-        Removes JWT public claims from payload.
+        Removes JWT library claims from payload.
 
         Author:
             Lucas Antognoni
@@ -209,7 +207,7 @@ def missing_public_claims_tests():
             prints the output from test.
     """
 
-    print('\n<<<<<<<<<< Missing public claims test >>>>>>>>>>\n')
+    print('\n<<<<<<<<<< Missing library claims test >>>>>>>>>>\n')
 
     claims = ['org_id', 'iss', 'exp', 'iat', 'nbf', 'jti', 'identity', 'access', 'fresh']
     to_be_removed = ['identity', 'access', 'fresh']
@@ -217,7 +215,10 @@ def missing_public_claims_tests():
     while len(to_be_removed) > 0:
         element = to_be_removed.pop()
 
-        print("\nRemoved claim: %s." % element)
+        if element == 'access':
+            print("\nRemoved claim: type.")
+        else:
+            print("\nRemoved claim: %s." % element)
 
         claims_ = [x for i, x in enumerate(claims) if x != element]
 

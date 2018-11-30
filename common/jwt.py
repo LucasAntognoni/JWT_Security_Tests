@@ -110,7 +110,7 @@ def custom_payload(claims, expiration):
     for c in claims:
 
         if c == 'identity':
-            payload[c] = 'test_user'
+            payload[c] = 'token_subject'
 
         elif c == 'org_id':
             payload[c] = 'test_org'
@@ -131,7 +131,7 @@ def custom_payload(claims, expiration):
             payload['fresh'] = False
 
         elif c == 'iss':
-            payload[c] = '3f95329783d2f4d0711bba881f37b41b'
+            payload[c] = 'token_issuer'
 
         elif c == 'exp':
             payload[c] = datetime.datetime.utcnow() + expiration
@@ -146,7 +146,7 @@ def custom_payload(claims, expiration):
             payload['nbf'] = datetime.datetime.utcnow() + datetime.timedelta(hours=1)
 
         elif c == 'jti':
-            payload[c] = 'c18993a47807863b69e1749f2db7d09e'
+            payload[c] = 'json_token_identifier'
 
         else:
             payload[c] = 'custom_claim'
