@@ -30,6 +30,8 @@
 +-----------------+------------------------------------------------------------------------+
 | 29 Nov 2018     | Lucas Antognoni | Started documentation with Sphinx                    |
 +-----------------+------------------------------------------------------------------------+
+| 03 Dec 2018     | Lucas Antognoni | Finished documentation                               |
++-----------------+------------------------------------------------------------------------+
 
 Implementation
 ==============
@@ -329,7 +331,7 @@ if __name__ == '__main__':
     none_algorithm_test()
     rs_to_hs_algorithm_test()
     missing_registered_claims_tests()
-    missing_public_claims_tests()
+    missing_library_claims_tests()
     missing_private_claim_test()
     expired_token_test()
     not_before_token_test()

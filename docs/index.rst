@@ -12,3 +12,5 @@ JSON Web Tokens Pentesting's Documentation
    introduction
    usage
    tests
+   tests_code
+   tools
