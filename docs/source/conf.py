@@ -28,7 +28,7 @@ copyright = u'2018, Lucas Antognoni'
 author = u'Lucas Antognoni'
 
 # The short X.Y version
-version = u''
+version = u'1.0'
 # The full version, including alpha/beta/rc tags
 release = u''
 

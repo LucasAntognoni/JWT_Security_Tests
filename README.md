@@ -1,17 +1,16 @@
-JWT Security Tests
-==================
+# JSON Web Tokens Pentesting
+
 
 This project aims to study and test the security of [Flask-JWT-Extended](https://flask-jwt-extended.readthedocs.io)
 python library. As the name says, it adds support for using JSON Web Tokens to
 [Flask](https://http://flask.pocoo.org/) in order to protect specific views.
 
 It implements a basic application with a single protected route that will be responsible for validating the tokens
-during the tests routines.
+during the tests routines.The tests where developed based on the JWT known vulnerabilities and best practices. 
 
-The tests where developed based on the JWT known vulnerabilities and best practices shown in the following
-references:
+## References
 
-**Normative**
+### Normative
 
 [[RFC7515](https://tools.ietf.org/html/rfc7515)] Jones, M., Bradley, J. and N. Sakimura, "JSON Web Signature (JWS)", RFC 7515, DOI 10.17487/RFC7515, May 2015.
 
@@ -21,7 +20,8 @@ references:
 
 [[RFC7519](https://tools.ietf.org/html/rfc7519)] Jones, M., Bradley, J. and N. Sakimura, "JSON Web Token (JWT)", RFC 7519, DOI 10.17487/RFC7519, May 2015.
 
-**Informative**
+
+### Informative
 
 [[Langkemper](https://www.sjoerdlangkemper.nl/2016/09/28/attacking-jwt-authentication/)] Langkemper, S., "Attacking JWT Authentication", September 2016.
 
