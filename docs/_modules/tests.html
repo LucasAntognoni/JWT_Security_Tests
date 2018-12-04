@@ -1,0 +1,445 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>tests &#8212; JSON Web Tokens Pentesting  documentation</title>
+    <link rel="stylesheet" href="../_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../_static/jquery.js"></script>
+    <script type="text/javascript" src="../_static/underscore.js"></script>
+    <script type="text/javascript" src="../_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for tests</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+<span class="sd">| **Version**     | 0.1                                                                    |</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+<span class="sd">| **Start**       | 27 Nov 2018                                                            |</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+<span class="sd">| **Platform**    | Unix                                                                   |</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+<span class="sd">| **Authors**     | Lucas Antognoni                                                        |</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+<span class="sd">| **Description** | Security Tests for JWT authentication                                  |</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+<span class="sd">| **Modifications**                                                                        |</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+<span class="sd">| **Date**        | **Author**      | **Modification**                                     |</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+<span class="sd">| 27 Nov 2018     | Lucas Antognoni | Base application structure                           |</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+<span class="sd">| 27 Nov 2018     | Lucas Antognoni | Organizing application structure                     |</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+<span class="sd">| 27 Nov 2018     | Lucas Antognoni | JWT tools                                            |</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+<span class="sd">| 27 Nov 2018     | Lucas Antognoni | Started tests development                            |</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+<span class="sd">| 28 Nov 2018     | Lucas Antognoni | None &amp; claims tests and started RSA to HMAC attack   |</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+<span class="sd">| 29 Nov 2018     | Lucas Antognoni | Finished all tests and started code documentation    |</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+<span class="sd">| 29 Nov 2018     | Lucas Antognoni | Upgrading tests robustness                           |</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+<span class="sd">| 29 Nov 2018     | Lucas Antognoni | Started documentation with Sphinx                    |</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+<span class="sd">| 03 Dec 2018     | Lucas Antognoni | Finished documentation                               |</span>
+<span class="sd">+-----------------+------------------------------------------------------------------------+</span>
+
+<span class="sd">Implementation</span>
+<span class="sd">==============</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="s1">&#39;/home/lucas/Git/JWT_Security_Tests&#39;</span><span class="p">])</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">common.jwt</span> <span class="k">import</span> <span class="n">create_token</span><span class="p">,</span> <span class="n">custom_header</span><span class="p">,</span> <span class="n">custom_payload</span><span class="p">,</span> <span class="n">append_custom_header</span>
+
+
+<span class="c1"># RSA Keys for testing</span>
+<span class="n">JWT_PUBLIC_KEY</span> <span class="o">=</span> <span class="s1">&#39;-----BEGIN PUBLIC KEY-----</span><span class="se">\n</span><span class="s1">MIGeMA0GCSqGSIb3DQEBAQUAA4GMADCBiAKBgHuPWRxAWbRQRij4/tWmfstd5gFL</span><span class="se">\n</span><span class="s1">O3Er2QrwoqEb2W98oOnLcyhxxdVDKhXtcnr1/H1WsTXS6aFNYk+9U8TIzmKtczKk</span><span class="se">\n</span><span class="s1">WKYttzc28kNOX+Ia+mOSB7ENYu1xA3FY9tKNS7PD/SOhKGEYcYzWbvX8Eiy8oGcb</span><span class="se">\n</span><span class="s1">3/Yy7MnpmOFO1PF/AgMBAAE=</span><span class="se">\n</span><span class="s1">-----END PUBLIC KEY-----&#39;</span>
+<span class="n">JWT_PRIVATE_KEY</span> <span class="o">=</span> <span class="s1">&#39;-----BEGIN RSA PRIVATE KEY-----</span><span class="se">\n</span><span class="s1">MIICWgIBAAKBgHuPWRxAWbRQRij4/tWmfstd5gFLO3Er2QrwoqEb2W98oOnLcyhx</span><span class="se">\n</span><span class="s1">xdVDKhXtcnr1/H1WsTXS6aFNYk+9U8TIzmKtczKkWKYttzc28kNOX+Ia+mOSB7EN</span><span class="se">\n</span><span class="s1">Yu1xA3FY9tKNS7PD/SOhKGEYcYzWbvX8Eiy8oGcb3/Yy7MnpmOFO1PF/AgMBAAEC</span><span class="se">\n</span><span class="s1">gYBsO+WTGct6Z9cNjQ+tl2r6OgaAm6Y2PHKjYqcS+ZI+Vq2eHtmBVCg3592114mw</span><span class="se">\n</span><span class="s1">rEnAgXA59ccxxNeZgf8fIcem6aj+xzXZoPXDiRw9EPSmQEYAjEVCq40uvt+Tl+j+</span><span class="se">\n</span><span class="s1">7OOND5FF2V2Y89mxUUmiO6xLrkjb2NqN86KEOC/VgbDaAQJBAN2CnpP4YZN7dijJ</span><span class="se">\n</span><span class="s1">NyRV+UKLc+MO5hq02yBXvnwEYG1xYXinr4ZX4eqsTbWT6AH8BGFDNq+hI8fKYOHz</span><span class="se">\n</span><span class="s1">r72FEXUCQQCOzHAsrlHqE1m/P9oEty8aKZTYnR01rWIsE4AZwGZTWw/awKq16WMh</span><span class="se">\n</span><span class="s1">1+q+s7nC8Lzt90H3j7OIUGUzXTZ74QSjAkASzlAgR+og106Ez/B6iUIMQEKqeE1Y</span><span class="se">\n</span><span class="s1">3xnreQeXB9gX8pRP5gyk3zky70X5sID2CitlBovSBWBAShJHnKTC9lUxAkA0Bo3T</span><span class="se">\n</span><span class="s1">6YrUkko/YH8I+siBaqbdKJjMxqee0Vf5idx+AA5Nr6ZCco54dRcEdax3NohO1qfF</span><span class="se">\n</span><span class="s1">DyjkwA2u4gYIqhmrAkB2ESXa2QD/rrD4r9FFT1YPYjmLi27lkqxe24fOKTsdGqvj</span><span class="se">\n</span><span class="s1">qGfEkU9AWx6AJN0H/1sMhkpMkXvLplLN+opoF/Id</span><span class="se">\n</span><span class="s1">-----END RSA PRIVATE KEY-----&#39;</span>
+
+
+<div class="viewcode-block" id="test_result_formatting"><a class="viewcode-back" href="../tests_code.html#tests.test_result_formatting">[docs]</a><span class="k">def</span> <span class="nf">test_result_formatting</span><span class="p">(</span><span class="n">response</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Formats the test output.</span>
+
+<span class="sd">        Author:</span>
+<span class="sd">            Lucas Antognoni</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            response (bytes): Protected endpoint response contents.</span>
+
+<span class="sd">        Response:</span>
+<span class="sd">            result (JSON): Response in JSON format.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">response_json</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&quot;&#39;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">response_json</span><span class="p">)</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+<div class="viewcode-block" id="send_request"><a class="viewcode-back" href="../tests_code.html#tests.send_request">[docs]</a><span class="k">def</span> <span class="nf">send_request</span><span class="p">(</span><span class="n">token</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Send request to protected endpoint.</span>
+
+<span class="sd">        Author:</span>
+<span class="sd">            Lucas Antognoni</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            token (bytes): JWT token.</span>
+
+<span class="sd">        Response:</span>
+<span class="sd">            response (requests.models.Response): Request to protected endpoint response.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;http://127.0.0.1:8080/protected&#39;</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Authorization&#39;</span><span class="p">:</span> <span class="p">(</span><span class="sa">b</span><span class="s1">&#39;Bearer &#39;</span> <span class="o">+</span> <span class="n">token</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)}</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">response</span></div>
+
+
+<div class="viewcode-block" id="none_algorithm_test"><a class="viewcode-back" href="../tests_code.html#tests.none_algorithm_test">[docs]</a><span class="k">def</span> <span class="nf">none_algorithm_test</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        None algorithm in token header test.</span>
+
+<span class="sd">        Author:</span>
+<span class="sd">            Lucas Antognoni</span>
+
+<span class="sd">        Arguments:</span>
+
+<span class="sd">        Response:</span>
+<span class="sd">            prints the output from test.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; None algorithm test &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">claims</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;identity&#39;</span><span class="p">,</span> <span class="s1">&#39;org_id&#39;</span><span class="p">,</span> <span class="s1">&#39;access&#39;</span><span class="p">,</span> <span class="s1">&#39;fresh&#39;</span><span class="p">,</span> <span class="s1">&#39;iss&#39;</span><span class="p">,</span> <span class="s1">&#39;exp&#39;</span><span class="p">,</span> <span class="s1">&#39;iat&#39;</span><span class="p">,</span> <span class="s1">&#39;nbf&#39;</span><span class="p">,</span> <span class="s1">&#39;jti&#39;</span><span class="p">]</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="n">custom_payload</span><span class="p">(</span><span class="n">claims</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">header</span> <span class="o">=</span> <span class="n">custom_header</span><span class="p">(</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="s1">&#39;JWT&#39;</span><span class="p">)</span>
+
+    <span class="n">token</span> <span class="o">=</span> <span class="n">create_token</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">JWT_PRIVATE_KEY</span><span class="p">,</span> <span class="s1">&#39;RS256&#39;</span><span class="p">)</span>
+
+    <span class="n">forged_token</span> <span class="o">=</span> <span class="n">append_custom_header</span><span class="p">(</span><span class="n">token</span><span class="p">,</span> <span class="n">header</span><span class="p">)</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">send_request</span><span class="p">(</span><span class="n">forged_token</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">test_result_formatting</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;#&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="rs_to_hs_algorithm_test"><a class="viewcode-back" href="../tests_code.html#tests.rs_to_hs_algorithm_test">[docs]</a><span class="k">def</span> <span class="nf">rs_to_hs_algorithm_test</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Encrypt token with public key and change algorithm header to HS256.</span>
+
+<span class="sd">        Author:</span>
+<span class="sd">            Lucas Antognoni</span>
+
+<span class="sd">        Arguments:</span>
+
+<span class="sd">        Response:</span>
+<span class="sd">            prints the output from test.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; RS256 to HS256 algorithm test &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">claims</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;identity&#39;</span><span class="p">,</span> <span class="s1">&#39;org_id&#39;</span><span class="p">,</span> <span class="s1">&#39;access&#39;</span><span class="p">,</span> <span class="s1">&#39;fresh&#39;</span><span class="p">,</span> <span class="s1">&#39;iss&#39;</span><span class="p">,</span> <span class="s1">&#39;exp&#39;</span><span class="p">,</span> <span class="s1">&#39;iat&#39;</span><span class="p">,</span> <span class="s1">&#39;nbf&#39;</span><span class="p">,</span> <span class="s1">&#39;jti&#39;</span><span class="p">]</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="n">custom_payload</span><span class="p">(</span><span class="n">claims</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">token</span> <span class="o">=</span> <span class="n">create_token</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">JWT_PUBLIC_KEY</span><span class="p">,</span> <span class="s1">&#39;HS256&#39;</span><span class="p">)</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">send_request</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">test_result_formatting</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;#&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="missing_registered_claims_tests"><a class="viewcode-back" href="../tests_code.html#tests.missing_registered_claims_tests">[docs]</a><span class="k">def</span> <span class="nf">missing_registered_claims_tests</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes JWT registered claims from payload.</span>
+
+<span class="sd">        Author:</span>
+<span class="sd">            Lucas Antognoni</span>
+
+<span class="sd">        Arguments:</span>
+
+<span class="sd">        Response:</span>
+<span class="sd">            prints the output from test.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; Missing registered claim test &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">claims</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;identity&#39;</span><span class="p">,</span> <span class="s1">&#39;org_id&#39;</span><span class="p">,</span> <span class="s1">&#39;access&#39;</span><span class="p">,</span> <span class="s1">&#39;fresh&#39;</span><span class="p">,</span> <span class="s1">&#39;iss&#39;</span><span class="p">,</span> <span class="s1">&#39;exp&#39;</span><span class="p">,</span> <span class="s1">&#39;iat&#39;</span><span class="p">,</span> <span class="s1">&#39;nbf&#39;</span><span class="p">,</span> <span class="s1">&#39;jti&#39;</span><span class="p">]</span>
+    <span class="n">to_be_removed</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;iss&#39;</span><span class="p">,</span> <span class="s1">&#39;exp&#39;</span><span class="p">,</span> <span class="s1">&#39;iat&#39;</span><span class="p">,</span> <span class="s1">&#39;nbf&#39;</span><span class="p">,</span> <span class="s1">&#39;jti&#39;</span><span class="p">]</span>
+
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">to_be_removed</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+
+        <span class="n">element</span> <span class="o">=</span> <span class="n">to_be_removed</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Removed claim: </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">element</span><span class="p">)</span>
+
+        <span class="n">claims_</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">claims</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="n">element</span><span class="p">]</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">claims_</span><span class="p">)</span>
+
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">custom_payload</span><span class="p">(</span><span class="n">claims_</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">token</span> <span class="o">=</span> <span class="n">create_token</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">JWT_PRIVATE_KEY</span><span class="p">,</span> <span class="s1">&#39;RS256&#39;</span><span class="p">)</span>
+
+        <span class="c1"># print(token)</span>
+        <span class="c1"># print()</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="n">send_request</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">test_result_formatting</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;#&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="missing_library_claims_tests"><a class="viewcode-back" href="../tests_code.html#tests.missing_library_claims_tests">[docs]</a><span class="k">def</span> <span class="nf">missing_library_claims_tests</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes JWT library claims from payload.</span>
+
+<span class="sd">        Author:</span>
+<span class="sd">            Lucas Antognoni</span>
+
+<span class="sd">        Arguments:</span>
+
+<span class="sd">        Response:</span>
+<span class="sd">            prints the output from test.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; Missing library claims test &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">claims</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;org_id&#39;</span><span class="p">,</span> <span class="s1">&#39;iss&#39;</span><span class="p">,</span> <span class="s1">&#39;exp&#39;</span><span class="p">,</span> <span class="s1">&#39;iat&#39;</span><span class="p">,</span> <span class="s1">&#39;nbf&#39;</span><span class="p">,</span> <span class="s1">&#39;jti&#39;</span><span class="p">,</span> <span class="s1">&#39;identity&#39;</span><span class="p">,</span> <span class="s1">&#39;access&#39;</span><span class="p">,</span> <span class="s1">&#39;fresh&#39;</span><span class="p">]</span>
+    <span class="n">to_be_removed</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;identity&#39;</span><span class="p">,</span> <span class="s1">&#39;access&#39;</span><span class="p">,</span> <span class="s1">&#39;fresh&#39;</span><span class="p">]</span>
+
+    <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">to_be_removed</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="n">to_be_removed</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">element</span> <span class="o">==</span> <span class="s1">&#39;access&#39;</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Removed claim: type.&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">Removed claim: </span><span class="si">%s</span><span class="s2">.&quot;</span> <span class="o">%</span> <span class="n">element</span><span class="p">)</span>
+
+        <span class="n">claims_</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">x</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">claims</span><span class="p">)</span> <span class="k">if</span> <span class="n">x</span> <span class="o">!=</span> <span class="n">element</span><span class="p">]</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">claims_</span><span class="p">)</span>
+
+        <span class="n">payload</span> <span class="o">=</span> <span class="n">custom_payload</span><span class="p">(</span><span class="n">claims_</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="n">token</span> <span class="o">=</span> <span class="n">create_token</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">JWT_PRIVATE_KEY</span><span class="p">,</span> <span class="s1">&#39;RS256&#39;</span><span class="p">)</span>
+
+        <span class="c1"># print(token)</span>
+        <span class="c1"># print()</span>
+
+        <span class="n">response</span> <span class="o">=</span> <span class="n">send_request</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+
+        <span class="nb">print</span><span class="p">(</span><span class="n">test_result_formatting</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;#&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="missing_private_claim_test"><a class="viewcode-back" href="../tests_code.html#tests.missing_private_claim_test">[docs]</a><span class="k">def</span> <span class="nf">missing_private_claim_test</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Removes JWT private claims from payload.</span>
+
+<span class="sd">        Author:</span>
+<span class="sd">            Lucas Antognoni</span>
+
+<span class="sd">        Arguments:</span>
+
+<span class="sd">        Response:</span>
+<span class="sd">            prints the output from test.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; Missing private claim test &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">claims</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;identity&#39;</span><span class="p">,</span> <span class="s1">&#39;access&#39;</span><span class="p">,</span> <span class="s1">&#39;fresh&#39;</span><span class="p">,</span> <span class="s1">&#39;iss&#39;</span><span class="p">,</span> <span class="s1">&#39;exp&#39;</span><span class="p">,</span> <span class="s1">&#39;iat&#39;</span><span class="p">,</span> <span class="s1">&#39;nbf&#39;</span><span class="p">,</span> <span class="s1">&#39;jti&#39;</span><span class="p">]</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="n">custom_payload</span><span class="p">(</span><span class="n">claims</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">token</span> <span class="o">=</span> <span class="n">create_token</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">JWT_PRIVATE_KEY</span><span class="p">,</span> <span class="s1">&#39;RS256&#39;</span><span class="p">)</span>
+
+    <span class="c1"># print(token)</span>
+    <span class="c1"># print()</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">send_request</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Removed claim: org_id&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">test_result_formatting</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;#&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="expired_token_test"><a class="viewcode-back" href="../tests_code.html#tests.expired_token_test">[docs]</a><span class="k">def</span> <span class="nf">expired_token_test</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Authenticate with expired JWT.</span>
+
+<span class="sd">        Author:</span>
+<span class="sd">            Lucas Antognoni</span>
+
+<span class="sd">        Arguments:</span>
+
+<span class="sd">        Response:</span>
+<span class="sd">            prints the output from test.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; Expired token test &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">claims</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;identity&#39;</span><span class="p">,</span> <span class="s1">&#39;org_id&#39;</span><span class="p">,</span> <span class="s1">&#39;access&#39;</span><span class="p">,</span> <span class="s1">&#39;fresh&#39;</span><span class="p">,</span> <span class="s1">&#39;iss&#39;</span><span class="p">,</span> <span class="s1">&#39;exp&#39;</span><span class="p">,</span> <span class="s1">&#39;iat&#39;</span><span class="p">,</span> <span class="s1">&#39;nbf&#39;</span><span class="p">,</span> <span class="s1">&#39;jti&#39;</span><span class="p">]</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="n">custom_payload</span><span class="p">(</span><span class="n">claims</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;10, 9, 8, 7....&#39;</span><span class="p">)</span>
+    <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+
+    <span class="n">token</span> <span class="o">=</span> <span class="n">create_token</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">JWT_PRIVATE_KEY</span><span class="p">,</span> <span class="s1">&#39;RS256&#39;</span><span class="p">)</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">send_request</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">test_result_formatting</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;#&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="not_before_token_test"><a class="viewcode-back" href="../tests_code.html#tests.not_before_token_test">[docs]</a><span class="k">def</span> <span class="nf">not_before_token_test</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Authenticate with not yet valid JWT.</span>
+
+<span class="sd">        Author:</span>
+<span class="sd">            Lucas Antognoni</span>
+
+<span class="sd">        Arguments:</span>
+
+<span class="sd">        Response:</span>
+<span class="sd">            prints the output from test.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; Not before token test &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">claims</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;identity&#39;</span><span class="p">,</span> <span class="s1">&#39;org_id&#39;</span><span class="p">,</span> <span class="s1">&#39;access&#39;</span><span class="p">,</span> <span class="s1">&#39;fresh&#39;</span><span class="p">,</span> <span class="s1">&#39;iss&#39;</span><span class="p">,</span> <span class="s1">&#39;exp&#39;</span><span class="p">,</span> <span class="s1">&#39;iat&#39;</span><span class="p">,</span> <span class="s1">&#39;nbf&#39;</span><span class="p">,</span> <span class="s1">&#39;jti&#39;</span><span class="p">]</span>
+    <span class="n">payload</span> <span class="o">=</span> <span class="n">custom_payload</span><span class="p">(</span><span class="n">claims</span><span class="p">,</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">hours</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+
+    <span class="n">token</span> <span class="o">=</span> <span class="n">create_token</span><span class="p">(</span><span class="n">payload</span><span class="p">,</span> <span class="n">JWT_PRIVATE_KEY</span><span class="p">,</span> <span class="s1">&#39;RS256&#39;</span><span class="p">)</span>
+
+    <span class="n">response</span> <span class="o">=</span> <span class="n">send_request</span><span class="p">(</span><span class="n">token</span><span class="p">)</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="n">test_result_formatting</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">content</span><span class="p">))</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;#&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">none_algorithm_test</span><span class="p">()</span>
+    <span class="n">rs_to_hs_algorithm_test</span><span class="p">()</span>
+    <span class="n">missing_registered_claims_tests</span><span class="p">()</span>
+    <span class="n">missing_library_claims_tests</span><span class="p">()</span>
+    <span class="n">missing_private_claim_test</span><span class="p">()</span>
+    <span class="n">expired_token_test</span><span class="p">()</span>
+    <span class="n">not_before_token_test</span><span class="p">()</span>
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">JSON Web Tokens Pentesting</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tests_code.html">Tests Code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tools.html">Tools</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../index.html">Documentation overview</a><ul>
+  <li><a href="index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Lucas Antognoni.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

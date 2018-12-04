@@ -1,0 +1,309 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Tests Code &#8212; JSON Web Tokens Pentesting  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tools" href="tools.html" />
+    <link rel="prev" title="Tests" href="tests.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="module-tests">
+<span id="tests-code"></span><h1>Tests Code<a class="headerlink" href="#module-tests" title="Permalink to this headline">¶</a></h1>
+<table border="1" class="docutils">
+<colgroup>
+<col width="19%" />
+<col width="81%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><strong>Version</strong></td>
+<td>0.1</td>
+</tr>
+<tr class="row-even"><td><strong>Start</strong></td>
+<td>27 Nov 2018</td>
+</tr>
+<tr class="row-odd"><td><strong>Platform</strong></td>
+<td>Unix</td>
+</tr>
+<tr class="row-even"><td><strong>Authors</strong></td>
+<td>Lucas Antognoni</td>
+</tr>
+<tr class="row-odd"><td><strong>Description</strong></td>
+<td>Security Tests for JWT authentication</td>
+</tr>
+<tr class="row-even"><td colspan="2"><strong>Modifications</strong></td>
+</tr>
+<tr class="row-odd"><td><strong>Date</strong></td>
+<td><strong>Author</strong>      | <strong>Modification</strong></td>
+</tr>
+<tr class="row-even"><td>27 Nov 2018</td>
+<td>Lucas Antognoni | Base application structure</td>
+</tr>
+<tr class="row-odd"><td>27 Nov 2018</td>
+<td>Lucas Antognoni | Organizing application structure</td>
+</tr>
+<tr class="row-even"><td>27 Nov 2018</td>
+<td>Lucas Antognoni | JWT tools</td>
+</tr>
+<tr class="row-odd"><td>27 Nov 2018</td>
+<td>Lucas Antognoni | Started tests development</td>
+</tr>
+<tr class="row-even"><td>28 Nov 2018</td>
+<td>Lucas Antognoni | None &amp; claims tests and started RSA to HMAC attack</td>
+</tr>
+<tr class="row-odd"><td>29 Nov 2018</td>
+<td>Lucas Antognoni | Finished all tests and started code documentation</td>
+</tr>
+<tr class="row-even"><td>29 Nov 2018</td>
+<td>Lucas Antognoni | Upgrading tests robustness</td>
+</tr>
+<tr class="row-odd"><td>29 Nov 2018</td>
+<td>Lucas Antognoni | Started documentation with Sphinx</td>
+</tr>
+<tr class="row-even"><td>03 Dec 2018</td>
+<td>Lucas Antognoni | Finished documentation</td>
+</tr>
+</tbody>
+</table>
+<div class="section" id="implementation">
+<h2>Implementation<a class="headerlink" href="#implementation" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="tests.expired_token_test">
+<code class="descclassname">tests.</code><code class="descname">expired_token_test</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tests.html#expired_token_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tests.expired_token_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Authenticate with expired JWT.</p>
+<dl class="docutils">
+<dt>Author:</dt>
+<dd>Lucas Antognoni</dd>
+</dl>
+<p>Arguments:</p>
+<dl class="docutils">
+<dt>Response:</dt>
+<dd>prints the output from test.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tests.missing_library_claims_tests">
+<code class="descclassname">tests.</code><code class="descname">missing_library_claims_tests</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tests.html#missing_library_claims_tests"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tests.missing_library_claims_tests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes JWT library claims from payload.</p>
+<dl class="docutils">
+<dt>Author:</dt>
+<dd>Lucas Antognoni</dd>
+</dl>
+<p>Arguments:</p>
+<dl class="docutils">
+<dt>Response:</dt>
+<dd>prints the output from test.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tests.missing_private_claim_test">
+<code class="descclassname">tests.</code><code class="descname">missing_private_claim_test</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tests.html#missing_private_claim_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tests.missing_private_claim_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes JWT private claims from payload.</p>
+<dl class="docutils">
+<dt>Author:</dt>
+<dd>Lucas Antognoni</dd>
+</dl>
+<p>Arguments:</p>
+<dl class="docutils">
+<dt>Response:</dt>
+<dd>prints the output from test.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tests.missing_registered_claims_tests">
+<code class="descclassname">tests.</code><code class="descname">missing_registered_claims_tests</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tests.html#missing_registered_claims_tests"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tests.missing_registered_claims_tests" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes JWT registered claims from payload.</p>
+<dl class="docutils">
+<dt>Author:</dt>
+<dd>Lucas Antognoni</dd>
+</dl>
+<p>Arguments:</p>
+<dl class="docutils">
+<dt>Response:</dt>
+<dd>prints the output from test.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tests.none_algorithm_test">
+<code class="descclassname">tests.</code><code class="descname">none_algorithm_test</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tests.html#none_algorithm_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tests.none_algorithm_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>None algorithm in token header test.</p>
+<dl class="docutils">
+<dt>Author:</dt>
+<dd>Lucas Antognoni</dd>
+</dl>
+<p>Arguments:</p>
+<dl class="docutils">
+<dt>Response:</dt>
+<dd>prints the output from test.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tests.not_before_token_test">
+<code class="descclassname">tests.</code><code class="descname">not_before_token_test</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tests.html#not_before_token_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tests.not_before_token_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Authenticate with not yet valid JWT.</p>
+<dl class="docutils">
+<dt>Author:</dt>
+<dd>Lucas Antognoni</dd>
+</dl>
+<p>Arguments:</p>
+<dl class="docutils">
+<dt>Response:</dt>
+<dd>prints the output from test.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tests.rs_to_hs_algorithm_test">
+<code class="descclassname">tests.</code><code class="descname">rs_to_hs_algorithm_test</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/tests.html#rs_to_hs_algorithm_test"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tests.rs_to_hs_algorithm_test" title="Permalink to this definition">¶</a></dt>
+<dd><p>Encrypt token with public key and change algorithm header to HS256.</p>
+<dl class="docutils">
+<dt>Author:</dt>
+<dd>Lucas Antognoni</dd>
+</dl>
+<p>Arguments:</p>
+<dl class="docutils">
+<dt>Response:</dt>
+<dd>prints the output from test.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tests.send_request">
+<code class="descclassname">tests.</code><code class="descname">send_request</code><span class="sig-paren">(</span><em>token</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tests.html#send_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tests.send_request" title="Permalink to this definition">¶</a></dt>
+<dd><p>Send request to protected endpoint.</p>
+<dl class="docutils">
+<dt>Author:</dt>
+<dd>Lucas Antognoni</dd>
+<dt>Arguments:</dt>
+<dd>token (bytes): JWT token.</dd>
+<dt>Response:</dt>
+<dd>response (requests.models.Response): Request to protected endpoint response.</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="tests.test_result_formatting">
+<code class="descclassname">tests.</code><code class="descname">test_result_formatting</code><span class="sig-paren">(</span><em>response</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tests.html#test_result_formatting"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#tests.test_result_formatting" title="Permalink to this definition">¶</a></dt>
+<dd><p>Formats the test output.</p>
+<dl class="docutils">
+<dt>Author:</dt>
+<dd>Lucas Antognoni</dd>
+<dt>Arguments:</dt>
+<dd>response (bytes): Protected endpoint response contents.</dd>
+<dt>Response:</dt>
+<dd>result (JSON): Response in JSON format.</dd>
+</dl>
+</dd></dl>
+
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">JSON Web Tokens Pentesting</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tests Code</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#implementation">Implementation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">Tools</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="tests.html" title="previous chapter">Tests</a></li>
+      <li>Next: <a href="tools.html" title="next chapter">Tools</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Lucas Antognoni.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/tests_code.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>

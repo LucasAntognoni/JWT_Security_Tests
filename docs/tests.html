@@ -1,0 +1,215 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Tests &#8212; JSON Web Tokens Pentesting  documentation</title>
+    <link rel="stylesheet" href="_static/alabaster.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script async="async" type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Tests Code" href="tests_code.html" />
+    <link rel="prev" title="Usage" href="usage.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+  
+  <meta name="viewport" content="width=device-width, initial-scale=0.9, maximum-scale=0.9" />
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <div class="section" id="tests">
+<h1>Tests<a class="headerlink" href="#tests" title="Permalink to this headline">¶</a></h1>
+<blockquote>
+<div><p>The following tests were implemented:</p>
+<ul class="simple">
+<li><cite>None</cite> algorithm header</li>
+<li>RS256 Public-Key as HS256 Secret</li>
+<li>Missing registered claims in payload</li>
+<li>Missing library claims in payload</li>
+<li>Missing private claims in payload</li>
+<li>Expired token</li>
+<li>Not yet valid token</li>
+</ul>
+<p>The goal is to see what the library offers as tools for verifying the JWT tokens. Covering from the most basic
+(and obvious) pentests to more sophisticated and tricky ones.</p>
+</div></blockquote>
+<div class="section" id="none-algorithm-header">
+<h2>None algorithm header<a class="headerlink" href="#none-algorithm-header" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>This attack occurs when the JWT header <cite>alg</cite> field is changed to <cite>None</cite> and the target system validates the token
+granting access to the attacker. In this scenario, the system does not enforce a signing algorithm nor does it
+checks if the field value matches the one that it is supposed to be using.</p>
+<p>When we send this tempered token to the protected endpoint, the extension checks the app configuration for a defined
+symmetric algorithm and its secret key (HS256) or public key (RSA256). If no algorithm is set, the library uses
+HS256 as default (and throws an error if no secret is set).</p>
+<p>Therefore the forged token won’t be validated and no access wil be granted to the attacker using this method.</p>
+</div></blockquote>
+</div>
+<div class="section" id="rs256-public-key-as-hs256-secret">
+<h2>RS256 Public-Key as HS256 Secret<a class="headerlink" href="#rs256-public-key-as-hs256-secret" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>This method, in particular, presumes that the attacker had access to the public key used in token validation and, to
+get access, a new token is forged using the key as a secret for the HS256 algorithm. Thus the JWT is signed and the
+header <cite>alg</cite> field is set to HS256.</p>
+<p>If the system does not enforce the RSA256 algorithm and also checks the token header or it depends on this same
+header to determine which verification algorithm it must use, the attacker will pass the decode function and
+validate the forged token.</p>
+<p>The library lets the programmer fix an algorithm, consequently the attacker won’t be able to use the forged token as
+it’s header <cite>alg</cite> field will not match with the ones currently in use.</p>
+</div></blockquote>
+</div>
+<div class="section" id="missing-registered-claims-in-payload">
+<h2>Missing registered claims in payload<a class="headerlink" href="#missing-registered-claims-in-payload" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>For this test some of the recommended claims, such as <cite>iss</cite>, <cite>exp</cite>, <cite>nbf</cite>, <cite>iat</cite> and <cite>jti</cite> where removed from the
+payload and the encoded token sent to the protected endpoint.</p>
+<p>Tests showed that only when the <cite>jti</cite> claim was removed from the JWT, it was considered invalid by the authorizer,
+while removing any of the remaining ones the token was still valid.</p>
+<p>Thus the library does not check if these claims are in the payload, only if oriented to do so.</p>
+</div></blockquote>
+</div>
+<div class="section" id="missing-library-claims-in-payload">
+<h2>Missing library claims in payload<a class="headerlink" href="#missing-library-claims-in-payload" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>The library determines some mandatory claims: <cite>fresh</cite>, <cite>type</cite> and <cite>identity</cite>. The first one says to the extension if
+the token is fresh or not, the second one defines the token type: <cite>access</cite> or <cite>refresh</cite>. The last one, <cite>identity</cite>,
+identifies the subject of the JWT (equivalent to the registered claim <cite>sub</cite>).</p>
+<p>If any of these claims were removed from the payload, the JWT was blocked by the authorizer.</p>
+</div></blockquote>
+</div>
+<div class="section" id="missing-private-claims-in-payload">
+<h2>Missing private claims in payload<a class="headerlink" href="#missing-private-claims-in-payload" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>Producers and consumers of JWTs may use claims that are not registered in the IANA “JSON Web Token Claims” registry,
+thus a custom claim was created (<cite>org_id</cite>) and used to verify if the library offered tools to validate or check them.</p>
+<p>The programmer can define a function to verify if the custom claims are in the token payload, but the their data
+validation must be done manually.</p>
+</div></blockquote>
+</div>
+<div class="section" id="expired-token">
+<h2>Expired token<a class="headerlink" href="#expired-token" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>Simple test to check if the library validates a expired token. The <cite>exp</cite> field is verified only if it is passed in
+the token payload.</div></blockquote>
+</div>
+<div class="section" id="not-yet-valid-token">
+<h2>Not yet valid token<a class="headerlink" href="#not-yet-valid-token" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div>Simple test to check if the library authorizes a token not yet valid for use. The field is not verified by the
+extension and the token is considered valid.</div></blockquote>
+</div>
+<div class="section" id="conclusion">
+<h2>Conclusion<a class="headerlink" href="#conclusion" title="Permalink to this headline">¶</a></h2>
+<blockquote>
+<div><p>We can see that the python library gives the user freedom to choose what rules will be used to authorize and verify
+a JWT. It offers some tools that make it easier to set them in code and shield the system from the attacks listed above.</p>
+<p>One thing to notice tough is that the extension uses the <cite>PyJWT</cite> library to encode and decode tokens. And in the tests i
+used this same package to generate tokens. But to create a forged token for “RS256 Public-Key as HS256 Secret” test,
+i had to alter it’s code, so i could get a token signed with the public key as a HS256 secret.</p>
+<p>This change was done because the library forbid the use of public keys and certificates as secrets for HMAC algorithm.</p>
+</div></blockquote>
+</div>
+</div>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="index.html">JSON Web Tokens Pentesting</a></h1>
+
+
+
+
+
+
+
+
+<h3>Navigation</h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="introduction.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tests</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#none-algorithm-header">None algorithm header</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rs256-public-key-as-hs256-secret">RS256 Public-Key as HS256 Secret</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#missing-registered-claims-in-payload">Missing registered claims in payload</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#missing-library-claims-in-payload">Missing library claims in payload</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#missing-private-claims-in-payload">Missing private claims in payload</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#expired-token">Expired token</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#not-yet-valid-token">Not yet valid token</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#conclusion">Conclusion</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tests_code.html">Tests Code</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tools.html">Tools</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="index.html">Documentation overview</a><ul>
+      <li>Previous: <a href="usage.html" title="previous chapter">Usage</a></li>
+      <li>Next: <a href="tests_code.html" title="next chapter">Tests Code</a></li>
+  </ul></li>
+</ul>
+</div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &copy;2018, Lucas Antognoni.
+      
+      |
+      Powered by <a href="http://sphinx-doc.org/">Sphinx 1.8.1</a>
+      &amp; <a href="https://github.com/bitprophet/alabaster">Alabaster 0.7.12</a>
+      
+      |
+      <a href="_sources/tests.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
